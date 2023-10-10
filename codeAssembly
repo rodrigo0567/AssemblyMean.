@@ -1,0 +1,85 @@
+section .data
+    msg1 db "Digite o primeiro número binário (8 bits): ",0
+    msg2 db "Digite o segundo número binário (8 bits): ",0
+    msg3 db "Resultado: ",0
+
+section .bss
+    num1 resb 9
+    num2 resb 9
+    result resb 9
+
+section .text
+    global _start
+
+_start:
+    ; Imprima mensagem para digitar o primeiro número binário
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg1
+    mov edx, 39
+    int 0x80
+
+    ; Leia o primeiro número binário
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, num1
+    mov edx, 9
+    int 0x80
+
+    ; Imprima mensagem para digitar o segundo número binário
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg2
+    mov edx, 41
+    int 0x80
+
+    ; Leia o segundo número binário
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, num2
+    mov edx, 9
+    int 0x80
+
+    ; Converta os números binários em inteiros
+    mov eax, 0
+    mov ecx, 9
+convert_loop:
+    shl eax, 1        ; Desloca o resultado para a esquerda
+    mov dl, [ecx + num1]  ; Carrega o dígito do primeiro número
+    sub dl, '0'       ; Subtrai o valor ASCII '0' do dígito
+    add eax, edx      ; Adiciona o dígito convertido ao resultado
+    mov dl, [ecx + num2]  ; Carrega o dígito do segundo número
+    sub dl, '0'       ; Subtrai o valor ASCII '0' do dígito
+    add eax, edx      ; Adiciona o dígito convertido ao resultado
+    dec ecx
+    jnz convert_loop
+
+    ; Converta o resultado de volta para binário
+    mov ecx, 9
+convert_back:
+    dec ecx
+    shl eax, 1
+    rcl byte [result], 1
+    jnc no_carry
+    inc byte [result]
+no_carry:
+    cmp ecx, 0
+    jne convert_back
+
+    ; Imprima o resultado binário
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg3
+    mov edx, 10
+    int 0x80
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result
+    mov edx, 9
+    int 0x80
+
+    ; Encerre o programa
+    mov eax, 1
+    mov ebx, 0
+    int 0x80
